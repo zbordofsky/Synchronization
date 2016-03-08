@@ -1,24 +1,34 @@
 #include <pthread.h>
+#include <getopt.h> 
+#include <stdlib.h>
+#include <unistd.h>
+#include <stdio.h>
+
+void testerFunc (int argc, char *argv[]); 
+void *threadAction(void *pointer); 
+//void *minusOne(void *pointer); 
+void add(long long *pointer, long long value); 
 
 long long *COUNTER = 0; 
-int main(int argc, *argv[]) { 
+int main(int argc, char *argv[]) { 
 	//timer function 
-	testerFunc(argc, *argv[]); 
+	testerFunc(argc, argv); 
 	//timer function 
 }
 
 
-void testerFunc (int argc, *argv[]) 
+void testerFunc (int argc, char *argv[]) 
 { 
 	static struct option long_options[] = 
 	{
 		{"iterations", optional_argument, 0, 'i'}, 
 		{"threads", optional_argument, 0, 't'}, 
 		{0, 0, 0, 0}
-	}
+	}; 
 	int opt; 
 	int iterations = 1; 
 	int numThreads = 1; 
+	int option_index = 0; 
 	opt = getopt_long(argc, argv, "a", long_options, &option_index); 
 	while(opt != -1) 
 	{ 
@@ -41,24 +51,36 @@ void testerFunc (int argc, *argv[])
 	int i; 
 	int ret; 
 	for(i = 0; i<numThreads; i++){
-		ret = pthread_create(&threads[i], NULL, plusOne, COUNTER); 
+		ret = pthread_create(&threads[i], NULL, threadAction, (void *) COUNTER); 
 		if(ret!=0){ 
 			fprintf(stderr, "Issue creating thread"); 
 		}
-		ret = pthread_create(&threads[i+numThreads], NULL, minusOne, COUNTER); 
+
+	}
+	for(i = 0; i < numThreads; i++) { 
+		//ret = pthread_join(threads[i], NULL); 
 		if(ret != 0){
-			fprintf(stderr, "Issue creating thread"); 
+			fprintf(stderr, "Isse joining threads"); 
 		}
+	}
+	//long long count = COUNTER; 
+	//printf("The count is: %d\n", count); 
+	if( COUNTER == 0){
+		printf("hey it works!\n"); 
+	}
+	else{ 
+		printf("the counter is: %d\n", COUNTER); 
 	}
 }
 
-void *plusOne(void *pointer) { 
+void *threadAction(void *pointer) { 
 	add(pointer, 1); 
-}
-
-void *minusOne(void *pointer) { 
 	add(pointer, -1); 
 }
+/*
+void *minusOne(void *pointer) { 
+	add(pointer, -1); 
+}*/
 
 
 void add(long long *pointer, long long value)
