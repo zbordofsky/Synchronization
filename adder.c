@@ -1,6 +1,6 @@
 #include <pthread.h>
 
-
+long long *COUNTER = 0; 
 int main(int argc, *argv[]) { 
 	//timer function 
 	testerFunc(argc, *argv[]); 
@@ -19,7 +19,6 @@ void testerFunc (int argc, *argv[])
 	int opt; 
 	int iterations = 1; 
 	int numThreads = 1; 
-	long long COUNTER = 0; 
 	opt = getopt_long(argc, argv, "a", long_options, &option_index); 
 	while(opt != -1) 
 	{ 
@@ -38,9 +37,28 @@ void testerFunc (int argc, *argv[])
 		}
 		opt = getopt_long(argc, argv, "a", long_options, &option_index); 
 	}
-	pthread_t *threads = malloc(sizeof(pthread_t)*numThreads) 
+	pthread_t threads[numThreads]; // = malloc(sizeof(pthread_t)*numThreads*2);  
+	int i; 
+	int ret; 
+	for(i = 0; i<numThreads; i++){
+		ret = pthread_create(&threads[i], NULL, plusOne, COUNTER); 
+		if(ret!=0){ 
+			fprintf(stderr, "Issue creating thread"); 
+		}
+		ret = pthread_create(&threads[i+numThreads], NULL, minusOne, COUNTER); 
+		if(ret != 0){
+			fprintf(stderr, "Issue creating thread"); 
+		}
+	}
 }
 
+void *plusOne(void *pointer) { 
+	add(pointer, 1); 
+}
+
+void *minusOne(void *pointer) { 
+	add(pointer, -1); 
+}
 
 
 void add(long long *pointer, long long value)
