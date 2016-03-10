@@ -1,0 +1,29 @@
+Questions 1.1
+	1. It takes that many threads because 
+	2. When there are significantly less threads and iterations, it rarely fails because there
+		is less of a chance of overlap, or things happening at the same time. With more operations,
+		there is a greater chance that threads can interfere with each other and add or subtract at 
+		the same time, causing the race condition. 
+
+Questions 1.2
+	1. Average cost per operation goes down with increasing the number iteratinos because the overhead
+		is spread out amongst all the operations, thus reducing the time for each one. With more operations, 
+		the time spent in context switches, or other overhead operations is relatively reduced when compared 
+		to the other actions occuring. 
+	2. We know the correct cost by looking at 
+	3. The yielding option slows things down so much because it does not always release the process to go to the 
+		next thread right away. Sometimes there is a delay in running the threads during yield, whcih causes slower 
+		run times. 
+	4. You cannot get accurate run times while using yield when things fail. This is because of the delay when the process
+		changes between threads. 
+
+Questions 1.3
+	1. When there is a low number of threads, there are less calls to the different locks, so the difference in their 
+		performance is reduced so that it is harder to observe. In these lower thread count cases, the performances are
+		very similar. 
+	2. The operations slow down with increased number of threads because all of the threads interupt each other and cause the 
+		others to have to wait longer to do their work. There is also an increase in the number of lock operations that must
+		be done. These two factors cause most of the slow down in performance. 
+	3. Spin locks are best used in situations where the data is not often changed, so the lock is held for a long time. In our 
+		system, the lock is constantly being changed, and the value is constantly being changed, causing the heavy operations
+		that change it to be run. 
