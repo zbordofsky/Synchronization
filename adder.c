@@ -9,6 +9,7 @@
 void testerFunc (int argc, char *argv[]); 
 void *threadAction(void *pointer); 
 void printInfo(struct timespec begin, struct timespec end); 
+void add_synC(long long *pointer, long long value); 
 //void *minusOne(void *pointer); 
 int iterations = 1; 
 int numThreads = 1; 
@@ -53,11 +54,19 @@ void testerFunc (int argc, char *argv[])
 			case 'i':
 			if(optarg != NULL)
 				iterations = atoi(optarg); 
+			if(iterations <=0){ 
+					fprintf(stderr, "Invalid number of iterations\n"); 
+					exit(1); 
+			}
 			break; 
 
 			case 't':
 			if(optarg != NULL)
 				numThreads = atoi(optarg); 
+			if(iterations <=0) {
+				fprintf(stderr, "Invalid number of threads\n"); 
+				exit(1); 
+			}
 			break; 
 			
 			case 'y': 
@@ -76,6 +85,13 @@ void testerFunc (int argc, char *argv[])
 					else if(optarg[0] == 'c'){ 
 						syncMethod = 3; 
 					}
+					else { 
+						fprintf(stderr, "Invalid parameter passed to sync.\n"); 
+						exit(1); 
+					}
+				}
+				else { 
+					fprintf(stderr, "No value for sync passed. Default value used.\n"); 
 				} 
 				break; 
 
@@ -83,13 +99,18 @@ void testerFunc (int argc, char *argv[])
 		opt = getopt_long(argc, argv, "a", long_options, &option_index); 
 	}
 	pthread_t *threads = malloc(sizeof(pthread_t)*numThreads);  
+	if(threads == NULL){ 
+		fprintf(stderr, "Error allocating memory.\n"); 
+		exit(1); 
+	}
 	int i; 
 	int ret = 1; 
-	printf("The threads are: %d\n", numThreads); 
+	//printf("The threads are: %d\n", numThreads); 
 	for(i = 0; i<numThreads; i++){
 		ret = pthread_create(&threads[i], NULL, threadAction, (void *) &COUNTER); 
 		if(ret!=0){ 
 			fprintf(stderr, "Issue creating thread\n"); 
+			exit(1); 
 		}
 
 	}
@@ -98,6 +119,7 @@ void testerFunc (int argc, char *argv[])
 		ret = pthread_join(threads[i], NULL); 
 		if(ret != 0){
 			fprintf(stderr, "Isse joining threads"); 
+			exit(1); 
 		}
 	}
 }
@@ -126,15 +148,14 @@ void *threadAction(void *pointer) {
 			
 		case 3: 
 			for(j = 0; j < iterations; j++) { 
-				while(__sync_val_compare_and_swap(&lock, 0, 1) == 1); 
-				add(pointer, 1); 
-				add(pointer, -1); 
-				lock = 0; 
+				add_synC(pointer, 1); 
+			}
+			for(j=0; j < iterations; j++) { 
+				add_synC(pointer, -1); 
 			}
 			break; 
 		case 0: 
 			for(j=0; j < iterations; j++) { 
-				//printf("counter is: %lld\n", COUNTER); 
 				add(pointer, 1); 
 				add(pointer, -1); 
 			}
@@ -169,4 +190,13 @@ void add(long long *pointer, long long value)
 	if(opt_yield)
 		pthread_yield(); 
 	*pointer = sum; 
+}
+
+void add_synC(long long *pointer, long long value) { 
+	long long original; 
+	long long sum; 
+	do{ 
+		original = *pointer; 
+		sum = original + value; 
+	}while(__sync_val_compare_and_swap(pointer, original, sum) != original); 
 }
