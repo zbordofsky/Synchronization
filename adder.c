@@ -119,7 +119,7 @@ void testerFunc (int argc, char *argv[])
 	for(i = 0; i < numThreads; i++) { 
 		ret = pthread_join(threads[i], NULL); 
 		if(ret != 0){
-			fprintf(stderr, "Isse joining threads"); 
+			fprintf(stderr, "Issue joining threads"); 
 			exit(1); 
 		}
 	}
