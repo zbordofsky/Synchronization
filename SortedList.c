@@ -175,20 +175,30 @@ int SortedList_delete( SortedListElement_t *element)
 SortedListElement_t *SortedList_lookup(SortedList_t *list, const char *key)
 {
 	SortedList_t *head = list;
-	while(strcmp(list->key, key) != 0 || list->next == head)
+	SortedList_t *curr = list->next;
+	while(strcmp(curr->key, key) != 0 && curr->next != head)
 	{
-		SortedList_t* temp = list->next;
+		
+		SortedList_t* temp = curr->next;
 		if (opt_yield & SEARCH_YIELD)
 		{
 			pthread_yield();
 		}
-		list = temp;
+		curr = temp;
+		printf("negroes\n");
 	}
-	if(list->key == NULL)
+	if(strcmp(curr->key, key) == 0)
 	{
-		return NULL;
+		printf("i hate girls");
+		return curr;
 	}
-	return list;
+//	if(curr->next->key == NULL)
+//	{
+		printf("pob\n");
+		return NULL;
+//	}
+//	printf("zach is gay");
+//	return curr;
 	
 }
 
@@ -351,6 +361,14 @@ temp = temp->next;
 printf("temp key is: %s\n", temp->key);
 printf("temp prev key is: %s\n", temp->prev->key);
 printf("temp next key is: %s\n\n", temp->next->key);
+
+
+SortedListElement_t* found;
+found = SortedList_lookup(dummy, "fucktrump");
+//printf("the found is: %s\n", found->key);
+
+
+
 return 0;
 	
 
