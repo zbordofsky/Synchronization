@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <time.h>
+#include "SortedList.h"
 #define BILLION  1000000000;
 
 void testerFunc (int argc, char *argv[]); 
