@@ -141,19 +141,24 @@ void SortedList_insert(SortedList_t *list, SortedListElement_t *element)
 
 int SortedList_delete( SortedListElement_t *element)
 {
-	SortedList_t* temp = dummy;
+
 	if(element->next != NULL && element->prev != NULL && element->next->prev != NULL && element->prev->next != NULL)
 	{	
 		if(element->next->prev == element && element->prev->next == element)
 		{
-			
-			temp->next->prev = temp->prev;
+			element->next->prev = element->prev;
+//			printf("pobelterZZZZ\n");
 			if (opt_yield & DELETE_YIELD)
 			{
 				pthread_yield();
 			}
-			temp->prev->next = temp->next;
-			free(temp);
+//			printf("pobelterSSSSS\n");
+			element->prev->next = element->next;
+//			printf("pobelterFUCK\n");
+			element->next = NULL;
+			element->prev = NULL;
+			return 0;
+//			printf("pobelter\n");
 		}
 		else
 		{
@@ -268,6 +273,7 @@ SortedList_insert(dummy, &list[1]);
 SortedList_insert(dummy, &list[2]);
 SortedList_insert(dummy, &list[3]);
 
+
 int index;
 SortedList_t *temp = dummy;
 printf("temp key is: %s\n", temp->key);
@@ -310,6 +316,41 @@ printf("temp next key is: %s\n\n", temp->next->key);
 printf("pobelter\n");
 int shit = SortedList_length(dummy);
 printf("the length is: %d\n", shit);
+
+SortedList_delete(&list[3]);
+
+int shit2 = SortedList_length(dummy);
+printf("the length is: %d\n", shit2);
+
+temp = dummy;
+printf("temp key is: %s\n", temp->key);
+printf("temp prev key is: %s\n", temp->prev->key);
+printf("temp next key is: %s\n\n", temp->next->key);
+
+temp = temp->next;
+
+printf("temp key is: %s\n", temp->key);
+printf("temp prev key is: %s\n", temp->prev->key);
+printf("temp next key is: %s\n\n", temp->next->key);
+
+temp = temp->next;
+printf("temp key is: %s\n", temp->key);
+printf("temp prev key is: %s\n", temp->prev->key);
+//printf("pobelter");
+printf("temp next key is: %s\n\n", temp->next->key);
+
+
+temp = temp->next;
+
+printf("temp key is: %s\n", temp->key);
+printf("temp prev key is: %s\n", temp->prev->key);
+printf("temp next key is: %s\n\n", temp->next->key);
+
+temp = temp->next;
+
+printf("temp key is: %s\n", temp->key);
+printf("temp prev key is: %s\n", temp->prev->key);
+printf("temp next key is: %s\n\n", temp->next->key);
 return 0;
 	
 
