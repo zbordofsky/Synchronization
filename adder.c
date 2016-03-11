@@ -179,7 +179,7 @@ void printInfo(struct timespec begin, struct timespec end){
 	if(COUNTER == 0)
 		printf("Everything worked!\n"); 
 	else
-		printf("Error: counter = %lld\n", COUNTER); 
+		fprintf(stderr, "Error: counter = %lld\n", COUNTER); 
 	printf("Elapsed time: %ld ns\n", totalTime); 
 	int perOp = totalTime / operations; 
 	printf("per operation: %d ns\n", perOp); 

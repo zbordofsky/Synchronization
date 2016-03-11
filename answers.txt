@@ -27,3 +27,30 @@ Questions 1.3
 	3. Spin locks are best used in situations where the data is not often changed, so the lock is held for a long time. In our 
 		system, the lock is constantly being changed, and the value is constantly being changed, causing the heavy operations
 		that change it to be run. 
+
+Questions 2.1
+	1. 
+
+Questions 2.2
+	1. 
+
+Questions 2.3 
+	1. 
+	2. 
+
+Part 3
+	1. The mutex needs to be held in order to put something to sleep because a thread needs to be able to do something
+		before being put to sleep. If the the thread did not hold the mutex prior to calling the function, then that
+		means that the fuction was called while the thread was already waiting. 
+	2. The waiting thread needs the ability to write/do its work so that the other threads don't have to wait longer than
+		necessary. By giving up the mutex, the sleeping thread gives the waiting threads a chance to run and do their 
+		operations. 
+	3. The mutex needs to be reacquired so that the thread that is woken up has the ability to do work. There would be no
+		point in waking up a thread if it just had to continue waiting, so the mutex needs to be reacquired in order 
+		to wake up a thread. 
+	4. This needs to be done inside of the function instead of outside of it because another waiting thread may steal
+		mutex before the thread that was sleeping has a chance to grab it. Then the thread is woken up just be waiting
+		instead of getting to do its work. 
+	5. The act of modifying a mutex is an instruction that the kernel does. This means that a user-mode based implementation
+		would not work because a user could not tell the kernel what to do like that. Instead, this must be implemented 
+		using a system call. 
