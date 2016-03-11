@@ -23,32 +23,65 @@ void SortedList_insert(SortedList_t *list, SortedListElement_t *element)
 	{
 		head->next = element;
 		head->prev = element;
-		if(opt_yield & INSERT_YIELD)
-		{
-			pthread_yield();
-		}
 		element->next = head;
 		element->prev = head;
 		return;
 	}
-	while(curr->next != head)
+/*	if(strcmp(element->key, curr->next->key) < 0)
 	{
-		oneBefore = curr;
-		if(opt_yield & INSERT_YIELD)
+		head->next = element;
+		head->prev = curr->next;
+		curr->prev = element;
+		element->next = curr;
+		element->prev = head;
+	}*/
+	while(curr->next != head) //|| strcmp(curr->key, element->key) < 0 )
+	{
+		if(curr != head)
 		{
-			pthread_yield();
+			if(strcmp(curr->key, element->key) <= 0)
+			{
+				if(strcmp(element->key, curr->next->key) <= 0)
+				{
+					break;
+				}
+			}
 		}
+		oneBefore = curr;
 		curr = curr->next;
+		if(oneBefore == head)
+		{
+			if(strcmp(element->key, curr->key) < 0)
+			{
+				head->next = element;
+				head->prev = curr->next;
+				curr->prev = element;
+				element->next = curr;
+				element->prev = head;			
+				return;
+			}
+		}
 	}
-	head->prev = element;
-	curr->next = element;
-	if(opt_yield & INSERT_YIELD)
+	if(curr->next == head)
 	{
-		pthread_yield();
+		head->prev = element;
+		element->next = head;
 	}
+	SortedList_t *temp;
+	temp = curr->next;
+	curr->next = element;
 	curr->prev = oneBefore;
-	element->next = head;
+	element->next = temp;
 	element->prev = curr;
+//	}
+/*	else
+	{
+		SortedList_t *temp;
+		temp = curr->next;
+		curr->next = element;
+		element->next = temp;
+		element->prev = curr;
+	}*/
 /*	while(list->next != head)	// find last element
 	{
 		oneBefore = list;
@@ -131,7 +164,11 @@ int SortedList_length(SortedList_t *list)
 	list = list->next;
 	while(list != head)
 	{
-		if(list->next->prev != list)
+		if (opt_yield & SEARCH_YIELD)
+		{
+			pthread_yield();
+		}
+		if(list->next->prev != list)//|| list->prev->next != list)
 		{
 			return -1;
 		}
@@ -140,10 +177,6 @@ int SortedList_length(SortedList_t *list)
 			return -2;
 		}
 		list = list->next;
-		if (opt_yield & SEARCH_YIELD)
-		{
-			pthread_yield();
-		}
 		count++;
 	}
 	return count;
@@ -165,18 +198,22 @@ dummy->prev = dummy;
 dummy->next = dummy;
 
 SortedList_t *list;
-int size = 2;
+int size = 4;
 list = (SortedList_t *)malloc(sizeof(SortedList_t) * size);
 
 char *string1;
 string1 = (char *)malloc(sizeof(char) * 5);
-string1 = "hello";
+string1 = "apple";
 char *string2;
 string2 = (char *)malloc(sizeof(char) * 5);
-string2= "quack";
+string2= "cattt";
 char *string3;
 string3 = (char *)malloc(sizeof(char) * 5);
-string3= "ggggg";
+string3= "aaaaa";
+
+char *string4;
+string4 = (char *)malloc(sizeof(char) * 5);
+string4= "abcde";
 
 list[0].key = string1;
 list[0].prev = NULL;
@@ -187,10 +224,14 @@ list[1].next = NULL;
 list[2].key = string3;
 list[2].prev = NULL;
 list[2].next = NULL;
+list[3].key = string4;
+list[3].prev = NULL;
+list[3].next = NULL;
 
 SortedList_insert(dummy, &list[0]);
 SortedList_insert(dummy, &list[1]);
 SortedList_insert(dummy, &list[2]);
+SortedList_insert(dummy, &list[3]);
 
 int index;
 SortedList_t *temp = dummy;
@@ -216,6 +257,12 @@ temp = temp->next;
 printf("temp key is: %s\n", temp->key);
 printf("temp prev key is: %s\n", temp->prev->key);
 printf("temp next key is: %s\n\n", temp->next->key);
+
+temp = temp->next;
+
+printf("temp key is: %s\n", temp->key);
+printf("temp prev key is: %s\n", temp->prev->key);
+printf("temp next key is: %s\n\n", temp->next->key);
 //printf("pobelter");
 /*for(index = 0; index < size; index++)
 {
@@ -225,7 +272,7 @@ printf("temp next key is: %s\n\n", temp->next->key);
 //	temp = temp->next;
 }*/
 
-//printf("pobelter\n");
+printf("pobelter\n");
 int shit = SortedList_length(dummy);
 printf("the length is: %d\n", shit);
 return 0;
