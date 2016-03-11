@@ -15,7 +15,37 @@ int opt_yield = 0;
 
 void SortedList_insert(SortedList_t *list, SortedListElement_t *element)
 {
+	if(list->next == list) {//no items in the list
+		list->next = element; 
+		list->prev = element; 
+		element->next = list; 
+		element->prev = list; 
+		return; 
+	}
+	else {
+		SortedListElement_t *temp = list->next;  
 	
+		while(temp->next != list){ 
+			if(strcmp(temp->key, element->key) >=0){
+				SortedListElement_t *previous = temp->prev; 
+				previous->next = element; 
+				element->prev = previous; 
+				element->next = temp; 
+				temp->prev = element; 
+				return; 
+			}
+			else{
+				temp = temp->next; 
+			}
+		}
+		if(temp->next == list){
+			temp->next = element; 
+			element->prev = temp; 
+			element->next = list; 
+			list->prev = element; 
+		}
+	}
+	/*
 	SortedList_t *head = list;
 	SortedList_t *curr = list;
 	SortedList_t* oneBefore = list;
@@ -35,7 +65,7 @@ void SortedList_insert(SortedList_t *list, SortedListElement_t *element)
 		element->next = curr;
 		element->prev = head;
 	}*/
-	while(curr->next != head) //|| strcmp(curr->key, element->key) < 0 )
+	/*while(curr->next != head) //|| strcmp(curr->key, element->key) < 0 )
 	{
 		if(curr != head)
 		{
@@ -72,7 +102,7 @@ void SortedList_insert(SortedList_t *list, SortedListElement_t *element)
 	curr->next = element;
 	curr->prev = oneBefore;
 	element->next = temp;
-	element->prev = curr;
+	element->prev = curr;*/
 //	}
 /*	else
 	{
@@ -101,6 +131,11 @@ void SortedList_insert(SortedList_t *list, SortedListElement_t *element)
 	element->prev = list;
 	element->next = head;
 	head->prev = element;*/
+
+
+
+
+
 }
 
 
