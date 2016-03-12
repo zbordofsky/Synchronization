@@ -1,16 +1,23 @@
+Zachary Bordofsky 304443257 zbordofsky@ucla.edu
+Chris Zhu 104455996 chriszhu@ucla.edu
 Questions 1.1
-	1. It takes that many threads because 
+	1. Appears to take about 10 threads and 500 iteratinos to get a consistent failure by 
+		the program. It takes this much to fail because of the increased number of operations
+		that has to occur in order to increase the chance that there is a failure on a 
+		consistent basis. 
 	2. When there are significantly less threads and iterations, it rarely fails because there
 		is less of a chance of overlap, or things happening at the same time. With more operations,
 		there is a greater chance that threads can interfere with each other and add or subtract at 
 		the same time, causing the race condition. 
 
 Questions 1.2
-	1. Average cost per operation goes down with increasing the number iteratinos because the overhead
+	1. Average cost per operation goes down with increasing the number iterations because the overhead
 		is spread out amongst all the operations, thus reducing the time for each one. With more operations, 
 		the time spent in context switches, or other overhead operations is relatively reduced when compared 
 		to the other actions occuring. 
-	2. We know the correct cost by looking at 
+	2. We know the cost is correct at high iteratinos because high iterations mimimize the overhead for 
+		creating threads. We pick the high iterations so we can minimize the threads overhead, and spread it
+		over all of threads and operations that occur. 
 	3. The yielding option slows things down so much because it does not always release the process to go to the 
 		next thread right away. Sometimes there is a delay in running the threads during yield, whcih causes slower 
 		run times. 
@@ -28,15 +35,20 @@ Questions 1.3
 		system, the lock is constantly being changed, and the value is constantly being changed, causing the heavy operations
 		that change it to be run. 
 
+
 Questions 2.1
-	1. 
+	1.Decreases and increases because it is going over a long list. For a low number there is a lot of overhead, 
+		but for longer list that is reduced. 
 
 Questions 2.2
-	1. 
+	1. Time increases because there are more threads. With more protection, and threads there are more collisions so
+		there is more time that needs to be taken to do everything. 
 
 Questions 2.3 
-	1. 
-	2. 
+	1. More lists means time decreases. More parallelism and less blocking
+	2. It's more interesting because we are looking at the threads relative to the amount of work they have to do
+		With only one list they would have to each take their turns ,but with more lists more can be going on at one
+		time or another. 
 
 Part 3
 	1. The mutex needs to be held in order to put something to sleep because a thread needs to be able to do something

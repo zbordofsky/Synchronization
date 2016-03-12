@@ -1,34 +1,40 @@
-#include <pthread.h> 
-#include <stdio.h> 
+#include <pthread.h>
 #include <getopt.h> 
-#include <stdlib.h> 
-#include <unistd.h> 
-#include <time.h> 
-//include list.h 
+#include <stdlib.h>
+#include <unistd.h>
+#include <stdio.h>
+#include <time.h>
+#define BILLION  1000000000;
 
-
+void testerFunc (int argc, char *argv[]); 
+void *threadAction(void *pointer); 
+void printInfo(struct timespec begin, struct timespec end); 
+void add_synC(long long *pointer, long long value); 
+//void *minusOne(void *pointer); 
+int iterations = 1; 
 int numThreads = 1; 
-int iteratinos = 1; 
-int numLists = 1; 
+int syncMethod = 0; 
 int opt_yield = 0; 
-struct timespec beginning; 
+int test_lock = 0; 
+int lock = 0; 
+pthread_mutex_t mutexAdd; 
+void add(long long *pointer, long long value); 
 
-void  (int argc, char *argv[]) ; 
-void *threadAction(); 
+long long *COUNTER = 0; 
 
 int main(int argc, char *argv[]) { 
-	struct timespec end;
+	//timer function 
+	struct timespec beginning, end; 
+	clock_gettime(CLOCK_REALTIME, &beginning); 
 	testerFunc(argc, argv); 
-	clock_gettime(CLOCK_REALTIME, &end);
-	
-	//print 
+	clock_gettime(CLOCK_REALTIME, &end); 
+	printInfo(beginning, end); 
+	pthread_mutex_destroy(&mutexAdd); 
 }
 
 
-
-void testerFunc (int argc, char *argv[]) { 
-	time_t t; 
-	srand((unsigned) time(&t)); 
+void testerFunc (int argc, char *argv[]) 
+{ 
 	static struct option long_options[] = 
 	{
 		{"iterations", optional_argument, 0, 'i'}, 
@@ -38,6 +44,8 @@ void testerFunc (int argc, char *argv[]) {
 		{0, 0, 0, 0}
 	}; 
 	int opt; 
+	
+	int option_index = 0; 
 	opt = getopt_long(argc, argv, "a", long_options, &option_index); 
 	while(opt != -1) 
 	{ 
@@ -64,96 +72,131 @@ void testerFunc (int argc, char *argv[]) {
 			case 'y': 
 				opt_yield = 1; 
 			break; 
+			
+			case 's': 
+				if(optarg[0] != '\0'){ 
+					if(optarg[0] == 'm') { 
+						syncMethod = 1; 
+						pthread_mutex_init(&mutexAdd, NULL); 
+					}	 
+					else if(optarg[0] == 's') { 
+						syncMethod = 2; 
+					}
+					else if(optarg[0] == 'c'){ 
+						syncMethod = 3; 
+					}
+					else { 
+						fprintf(stderr, "Invalid parameter passed to sync.\n"); 
+						exit(1); 
+					}
+				}
+				else { 
+					fprintf(stderr, "No value for sync passed. Default value used.\n"); 
+				} 
+				break; 
+
 		}
+		opt = getopt_long(argc, argv, "a", long_options, &option_index); 
 	}
-	//create the list 
-	SortedListElement_t *elements = malloc(sizeof(SortedListElement_t)*numThreads*iterations); 
-	int j; 
-	for(j=0; j < (numThreads*iterations); j++){ 
-		SortedListElement_t temp; 
-		temp.key = rand(); 
-		elements[i] = temp; 
+	pthread_t *threads = malloc(sizeof(pthread_t)*numThreads);  
+	if(threads == NULL){ 
+		fprintf(stderr, "Error allocating memory.\n"); 
+		exit(1); 
+	}
+	int i; 
+	int ret = 1; 
+	//printf("The threads are: %d\n", numThreads); 
+	for(i = 0; i<numThreads; i++){
+		ret = pthread_create(&threads[i], NULL, threadAction, (void *) &COUNTER); 
+		if(ret!=0){ 
+			fprintf(stderr, "Issue creating thread\n"); 
+			exit(1); 
+		}
+
 	}
 	
-	//time function-make structs gobals 
-	clock_gettime(CLOCK_REALTIME, &beginning);
-	pthread_t *threads = malloc(sizeof(pthread_t)*numThreads); 
-	int i; 
-	int ret; 
-	for(i = 0; i < numThreads; i++) {
-		ret = pthread_create(&threads[i], NULL, threadAction, &threads[i*iterations]); 
-		if(ret!= 0) { 
-			fprintf(stderr, "Error creating threads\n"); 
-			exit(1); 
-		}
-	}
-
-	for(i=0; i<numThreads, i++) { 
+	for(i = 0; i < numThreads; i++) { 
 		ret = pthread_join(threads[i], NULL); 
-		if(ret!= 0){
-			fprintf(stderr, "Error joining threads.\n"); 
+		if(ret != 0){
+			fprintf(stderr, "Isse joining threads"); 
 			exit(1); 
 		}
 	}
 }
 
-void *threadAction(SortedListElement_t *elements){
-	//do the thread stuff here
-	SortedList_t **list malloc(sizeof(SortedList_t*)*numLists);
-
-	int i; 
+void *threadAction(void *pointer) { 
 	int j; 
-	int mod; 
-	int nums[numLists]; 
-	for(i=0; i < numLists; i++)
-		nums[i] = 0; 
-
-	for(i=0; i < iterations; i++){
-		mod = modular(elements[i].key); 
-		SortedList_insert(list[mod], elements[i]); 
-		nums[mod]++; 
-	}
-
-	int length; 
-	for(i=0; i < numLists; i++)
-		length = SortedList_length(list[i]); 
-
-	SortedListElement_t *found = malloc(sizeof(SortedList_Element_t)*iterations); 
-	for(i=0; i<numLists; i++){
-		for(j=0; j < nums[i]; j++){
-			found[i*numLists + j] = SortedList_lookup(list[i], elements[i].key); 
-			if(found[i*numLists +j] != NULL)
-				break; 
-		}
+	switch(syncMethod) 
+	{
+		case 1: 
+			for(j=0; j< iterations; j++) { 
+				pthread_mutex_lock(&mutexAdd); 
+				add(pointer, 1); 
+				add(pointer, -1); 
+				pthread_mutex_unlock(&mutexAdd); 
+			}
+		break; 
 		
+		case 2: 
+			for(j=0; j < iterations; j++) { 
+				while(__sync_lock_test_and_set(&test_lock, 1)); 
+				add(pointer, 1); 
+				add(pointer, -1); 
+				__sync_lock_release(&test_lock); 
+			} 
+			break; 
+			
+		case 3: 
+			for(j = 0; j < iterations; j++) { 
+				add_synC(pointer, 1); 
+			}
+			for(j=0; j < iterations; j++) { 
+				add_synC(pointer, -1); 
+			}
+			break; 
+		case 0: 
+			for(j=0; j < iterations; j++) { 
+				add(pointer, 1); 
+				add(pointer, -1); 
+			}
+		break; 
 	}
-
-	for(i=0; i<iterations; i++){
-		SortedList_delete(found[i]); 
-	}
-
 }
 
-void printInfo(struct timespec begin, struct timespec end) {
-	time_t sec = (end.tv_sec - begin.tv_sec) * 1000000000; 
+void printInfo(struct timespec begin, struct timespec end){ 
+	time_t secs = (end.tv_sec - begin.tv_sec) * 1000000000; 
 	long int nsecs; 
 	if( end.tv_nsec > begin.tv_nsec)
 		nsecs = end.tv_nsec - begin.tv_nsec; 
 	else
 		nsecs = begin.tv_nsec- end.tv_nsec; 
 	long int totalTime = (long int) secs + nsecs; 
-
-	int operations; 
-
-	printf("%d threads x %d iterations x (ins + lookup/del) x (%d/2 avg len) = %d operations\n", numThreads, iterations, iterations, operations); 
-	//check list, not sure about that yet 
-
-	printf("Elapsed time: %d ns\n", totalTime); 
-	int perOp = totatTime / operations; 
-	printf("per op: %d ns\n", perOp); 
+	
+	int operations = numThreads * iterations * 2; 
+	
+	printf("%d threads x %d iterations x (add + subtract) = %d operations\n", numThreads, iterations, operations); 
+	if(COUNTER == 0)
+		printf("Everything worked!\n"); 
+	else
+		printf("Error: counter = %lld\n", COUNTER); 
+	printf("Elapsed time: %ld ns\n", totalTime); 
+	int perOp = totalTime / operations; 
+	printf("per operation: %d ns\n", perOp); 
 }
 
-int modular(char *key){
-	int mod = key[0] % numLists; 
-	return mod; 
+void add(long long *pointer, long long value)
+{ 
+	long long sum = *pointer + value; 
+	if(opt_yield)
+		pthread_yield(); 
+	*pointer = sum; 
+}
+
+void add_synC(long long *pointer, long long value) { 
+	long long original; 
+	long long sum; 
+	do{ 
+		original = *pointer; 
+		sum = original + value; 
+	}while(__sync_val_compare_and_swap(pointer, original, sum) != original); 
 }
